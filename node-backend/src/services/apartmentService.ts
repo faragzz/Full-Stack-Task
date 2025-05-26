@@ -18,7 +18,7 @@ export const getApartments = async (page: number, limit: number) => {
         const [apartments, total] = await apartmentRepo.findAndCount({
             skip,
             take: limit,
-            relations: ['details'],
+            // relations: ['details'],
         });
 
         return {
@@ -110,8 +110,7 @@ export const searchApartments = async (filters: {
 }) => {
     try {
         const query = apartmentRepo
-            .createQueryBuilder('apartment')
-            .leftJoinAndSelect('apartment.details', 'details');
+            .createQueryBuilder('apartment');
 
         if (filters.unitName) {
             query.andWhere('LOWER(apartment.unitName) LIKE LOWER(:unitName)', {
