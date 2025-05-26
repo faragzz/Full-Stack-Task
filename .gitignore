@@ -19,7 +19,9 @@ dist/
 # next.js
 /.next/
 /out/
-
+.next
+./frontend/.next/
+./frontend/node_modules/
 # production
 /build
 
