@@ -1,42 +1,64 @@
 import {Request, Response} from 'express';
-import {AppDataSource} from '../../ormconfig';
-import {Apartment} from '../entities/apartment';
 import {plainToInstance} from "class-transformer";
 import {CreateApartmentDto} from "../dto/createApartmentDto";
 import {validate} from "class-validator";
 import {ApartmentIdDto} from "../dto/apartmentIdDto";
 import formatValidationErrors from "../errorHandling";
+import apartmentService from "../services/apartmentService";
 
-const apartmentRepo = AppDataSource.getRepository(Apartment);
-
+/**
+ * @swagger
+ * /apartments:
+ *   get:
+ *     summary: Get all apartments
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of items per page
+ *     responses:
+ *       200:
+ *         description: A list of apartments
+ */
 export const getApartments = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
 
-    try {
-        const skip = (page - 1) * limit;
+    const result = await apartmentService.getApartments(page, limit);
 
-        const [apartments, total] = await apartmentRepo.findAndCount({
-            skip,
-            take: limit,
-            relations: ['details'],
-        });
-        res.json({
-            data: apartments,
-            total,
-            page,
-            last_page: Math.ceil(total / limit),
-        });
-    } catch (error) {
-        console.error('Error fetching apartments with pagination:', error);
-        return res.status(500).json({
-            status: 'error',
-            message: 'Internal server error',
-        });
+    if (result.status === 'error') {
+        return res.status(500).json(result);
     }
+
+    return res.json(result);
 };
 
-
+/**
+ * @swagger
+ * /apartments/id/{id}:
+ *   get:
+ *     summary: Get an apartment by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Apartment ID
+ *     responses:
+ *       200:
+ *         description: Apartment details
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Apartment not found
+ */
 export const getApartmentById = async (req: Request, res: Response) => {
     const apartmentIdDto = plainToInstance(ApartmentIdDto, req.params);
     const errors = await validate(apartmentIdDto);
@@ -49,27 +71,39 @@ export const getApartmentById = async (req: Request, res: Response) => {
         });
     }
 
-    const apartment = await apartmentRepo.findOne({
-        where: {id: Number(req.params.id)},
-        relations: ['details'],
-    });
-    if (!apartment) {
-        return res.status(404).json({
-            status: 'error',
-            message: `Apartment with id ${apartmentIdDto.id} not found`,
-        });
+    const result = await apartmentService.getApartmentById(Number(apartmentIdDto.id));
+
+    if (result.status === 'error') {
+        if (result.message?.includes('not found')) {
+            return res.status(404).json(result);
+        }
+        return res.status(500).json(result);
     }
 
-    return res.json({
-        status: 'success',
-        data: apartment,
-    });
+    return res.json(result);
 };
 
+/**
+ * @swagger
+ * /apartments/create:
+ *   post:
+ *     summary: Create a new apartment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateApartmentDto'
+ *     responses:
+ *       201:
+ *         description: Apartment created successfully
+ *       400:
+ *         description: Validation failed
+ */
 export const createApartment = async (req: Request, res: Response) => {
     const createApartmentDto = plainToInstance(CreateApartmentDto, req.body);
-
     const errors = await validate(createApartmentDto);
+
     if (errors.length > 0) {
         return res.status(400).json({
             status: 'error',
@@ -78,19 +112,53 @@ export const createApartment = async (req: Request, res: Response) => {
         });
     }
 
-    try {
-        const apartment = apartmentRepo.create(createApartmentDto);
-        await apartmentRepo.save(apartment);
+    const result = await apartmentService.createApartment(createApartmentDto);
 
-        return res.status(201).json({
-            status: 'success',
-            data: apartment,
-        });
-    } catch (error) {
-        console.error('Error creating apartment:', error);
-        return res.status(500).json({
-            status: 'error',
-            message: 'Internal server error',
-        });
+    if (result.status === 'error') {
+        return res.status(500).json(result);
     }
+
+    return res.status(201).json(result);
 };
+
+/**
+ * @swagger
+ * /apartments/search:
+ *   get:
+ *     summary: Search for apartments by filters
+ *     parameters:
+ *       - in: query
+ *         name: unitName
+ *         schema:
+ *           type: string
+ *         description: Unit name
+ *       - in: query
+ *         name: unitNumber
+ *         schema:
+ *           type: string
+ *         description: Unit number
+ *       - in: query
+ *         name: project
+ *         schema:
+ *           type: string
+ *         description: Project name
+ *     responses:
+ *       200:
+ *         description: Filtered list of apartments
+ */
+export const searchApartments = async (req: Request, res: Response) => {
+    const filters = {
+        unitName: req.query.unitName as string,
+        unitNumber: req.query.unitNumber as string,
+        project: req.query.project as string,
+    };
+
+    const result = await apartmentService.searchApartments(filters);
+
+    if (result.status === 'error') {
+        return res.status(500).json(result);
+    }
+
+    return res.json(result);
+};
+
