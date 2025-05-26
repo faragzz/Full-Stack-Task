@@ -2,7 +2,7 @@ import app from './app';
 import { connectDB } from './database';
 import "reflect-metadata";
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3002;
 
 connectDB().then(() => {
     app.listen(PORT, () => {
