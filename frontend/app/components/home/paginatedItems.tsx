@@ -2,7 +2,7 @@
 import React from "react";
 import ReactPaginate from "react-paginate";
 import {Items} from "@/app/components/home/Items";
-import {Apartment} from "@/libs/types/getApartments";
+import {Apartment} from "@/libs/types/types";
 
 type PaginatedItemsProps = {
     items: Apartment[];
@@ -18,9 +18,8 @@ export const PaginatedItems = ({
                                    currentPage,
                                    onPageChange,
                                }: PaginatedItemsProps) => {
-    // ReactPaginate's pages are zero-based; currentPage is 1-based
     const handlePageClick = (event: { selected: number }) => {
-        onPageChange(event.selected + 1); // +1 to match 1-based pages in your API
+        onPageChange(event.selected + 1);
     };
 
     return (
@@ -34,7 +33,7 @@ export const PaginatedItems = ({
                     onPageChange={handlePageClick}
                     pageRangeDisplayed={3}
                     pageCount={pageCount}
-                    forcePage={currentPage - 1} // sync selected page
+                    forcePage={currentPage - 1}
                     renderOnZeroPageCount={null}
                     containerClassName="flex gap-2"
                     pageClassName="px-3 py-1 border border-gray-300 rounded cursor-pointer"

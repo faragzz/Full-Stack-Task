@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import {Apartment} from "@/libs/types/getApartments";
+import {Apartment} from "@/libs/types/types";
 import normalizeImageSrc from "@/utils/imageValidation";
 import {useRouter} from 'next/navigation'
 
@@ -37,7 +37,6 @@ export const Items = ({currentApartment}: { currentApartment: Apartment[] }) => 
                             </div>
                         )}
 
-                        {/* Info */}
                         <div className="p-5 flex flex-col justify-between flex-grow">
                             <div>
                                 <h3 className="text-xl md:text-2xl font-semibold text-gray-900">

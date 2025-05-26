@@ -18,7 +18,6 @@ export const getApartments = async (page: number, limit: number) => {
         const [apartments, total] = await apartmentRepo.findAndCount({
             skip,
             take: limit,
-            // relations: ['details'],
         });
 
         return {
@@ -95,22 +94,33 @@ export const createApartment = async (createApartmentDto: CreateApartmentDto) =>
 };
 
 /**
- * Searches apartments based on unit name, unit number, or project name.
+ * Searches apartments based on optional filters and returns paginated results.
  *
  * @param {Object} filters - Object containing optional filter parameters.
  * @param {string} [filters.unitName] - Filter by unit name (partial match, case-insensitive).
  * @param {string} [filters.unitNumber] - Filter by unit number (partial match, case-insensitive).
  * @param {string} [filters.project] - Filter by project name (partial match, case-insensitive).
- * @returns {Promise<object>} Filtered apartments, total count, and status.
+ * @param {number} [filters.page=1] - The page number for pagination.
+ * @param {number} [filters.limit=10] - Number of items per page.
+ *
+ * @returns {Promise<Object>} A promise that resolves to an object containing filtered apartments, pagination metadata, and status.
  */
 export const searchApartments = async (filters: {
     unitName?: string;
     unitNumber?: string;
     project?: string;
+    page?: number;
+    limit?: number;
 }) => {
     try {
+        const page = filters.page || 1;
+        const limit = filters.limit || 10;
+        const skip = (page - 1) * limit;
+
         const query = apartmentRepo
-            .createQueryBuilder('apartment');
+            .createQueryBuilder('apartment')
+            .skip(skip)
+            .take(limit);
 
         if (filters.unitName) {
             query.andWhere('LOWER(apartment.unitName) LIKE LOWER(:unitName)', {
@@ -130,12 +140,14 @@ export const searchApartments = async (filters: {
             });
         }
 
-        const apartments = await query.getMany();
+        const [apartments, total] = await query.getManyAndCount();
 
         return {
             status: 'success',
             data: apartments,
-            total: apartments.length,
+            total,
+            page,
+            last_page: Math.ceil(total / limit),
         };
     } catch (error) {
         console.error('Error searching apartments:', error);
