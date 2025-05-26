@@ -3,6 +3,7 @@ import apartmentRoutes from './routes/apartment.routes';
 import dotenv from 'dotenv';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
+import cors from 'cors';
 
 dotenv.config();
 const app = express();
@@ -27,6 +28,10 @@ const options = {
 };
 
 const swaggerSpec = swaggerJsdoc(options);
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/apartments', apartmentRoutes);
