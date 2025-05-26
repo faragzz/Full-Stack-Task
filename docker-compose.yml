@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: my-postgres-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret123
+      POSTGRES_DB: apartments_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: backend
+      dockerfile: Dockerfile
+    container_name: nestjs-backend
+    ports:
+      - '3001:3001'
+    environment:
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: admin
+      DATABASE_PASSWORD: secret123
+      DATABASE_NAME: apartments_db
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+    command: npm run start:prod
+
+  web:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    container_name: nextjs-web
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    command: npm run start
+
+volumes:
+  pgdata:
+
+networks:
+  app-network:
