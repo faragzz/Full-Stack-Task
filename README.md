@@ -37,6 +37,10 @@ Swagger UI is available once the backend is running at:
 
 ## Local Development & Deployment
 
+Before running the project (with or without Docker), make sure to:
+
+- **Rename `.env.example` to `.env`** in both the frontend and backend directories.
+
 ### Prerequisites
 - Docker & Docker Compose installed
 - Node.js & npm (if running without Docker)
