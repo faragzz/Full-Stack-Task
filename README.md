@@ -45,3 +45,20 @@ Swagger UI is available once the backend is running at:
 
 ```bash
 docker-compose up --build
+```
+---
+
+**Note:**
+The apartment data and images displayed in the screenshots above are **fake generated** sample data created for testing and demonstration purposes only.
+
+---
+
+![image](https://github.com/user-attachments/assets/88c791e4-0923-47f6-acbd-80644edfba3c)
+![image](https://github.com/user-attachments/assets/4d3152fa-f1a5-4e95-b3e4-d5a4dd5423be)
+![image](https://github.com/user-attachments/assets/9a83b2fc-e3c2-4717-9561-a66e4965ee26)
+![image](https://github.com/user-attachments/assets/3a2b00d0-6707-4a77-b6cc-c1e9376384e7)
+![image](https://github.com/user-attachments/assets/b524b126-7ce9-4bd3-a8ce-75b3f1e4ffc3)
+
+
+
+
