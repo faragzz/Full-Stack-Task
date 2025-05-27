@@ -23,7 +23,7 @@ export function generateFakeApartments(length: number): CreateApartmentDto[] {
             unitNumber: i.toString(),
             project: faker.company.name(),
             description: faker.lorem.paragraph(),
-            price: parseFloat(faker.commerce.price({min: 10000, max: 500000, dec: 2})),
+            price: Math.round(parseFloat(faker.commerce.price({min: 800000, max: 20000000}))),
             images: Array.from({length: 3}, () => faker.image.urlPicsumPhotos()),
             details,
         };
