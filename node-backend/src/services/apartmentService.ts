@@ -93,6 +93,13 @@ export const createApartment = async (createApartmentDto: CreateApartmentDto) =>
     }
 };
 
+type SearchParams = {
+    unitName?: string;
+    unitNumber?: string;
+    project?: string;
+    page: number;
+    limit: number;
+};
 /**
  * Searches apartments based on optional filters and returns paginated results.
  *
@@ -105,16 +112,16 @@ export const createApartment = async (createApartmentDto: CreateApartmentDto) =>
  *
  * @returns {Promise<Object>} A promise that resolves to an object containing filtered apartments, pagination metadata, and status.
  */
-export const searchApartments = async (filters: {
-    unitName?: string;
-    unitNumber?: string;
-    project?: string;
-    page?: number;
-    limit?: number;
-}) => {
+
+
+export const searchApartments = async ({
+                                           unitName,
+                                           unitNumber,
+                                           project,
+                                           page,
+                                           limit,
+                                       }: SearchParams) => {
     try {
-        const page = filters.page || 1;
-        const limit = filters.limit || 10;
         const skip = (page - 1) * limit;
 
         const query = apartmentRepo
@@ -122,21 +129,21 @@ export const searchApartments = async (filters: {
             .skip(skip)
             .take(limit);
 
-        if (filters.unitName) {
+        if (unitName) {
             query.andWhere('LOWER(apartment.unitName) LIKE LOWER(:unitName)', {
-                unitName: `%${filters.unitName}%`,
+                unitName: `%${unitName}%`,
             });
         }
 
-        if (filters.unitNumber) {
+        if (unitNumber) {
             query.andWhere('LOWER(apartment.unitNumber) LIKE LOWER(:unitNumber)', {
-                unitNumber: `%${filters.unitNumber}%`,
+                unitNumber: `%${unitNumber}%`,
             });
         }
 
-        if (filters.project) {
+        if (project) {
             query.andWhere('LOWER(apartment.project) LIKE LOWER(:project)', {
-                project: `%${filters.project}%`,
+                project: `%${project}%`,
             });
         }
 
@@ -159,9 +166,65 @@ export const searchApartments = async (filters: {
 };
 
 
+/**
+ * Deletes a single apartment by its ID.
+ *
+ * @param {number} id - The ID of the apartment to delete.
+ * @returns {Promise<object>} Status and message of the operation.
+ */
+export const deleteApartmentById = async (id: number) => {
+    try {
+        const result = await apartmentRepo.delete(id);
+
+        if (result.affected === 0) {
+            return {
+                status: 'error',
+                message: `Apartment with id ${id} not found.`,
+            };
+        }
+
+        return {
+            status: 'success',
+            message: `Apartment with id ${id} has been deleted successfully.`,
+        };
+    } catch (error) {
+        console.error(`Error deleting apartment with id ${id}:`, error);
+        return {
+            status: 'error',
+            message: 'Internal server error',
+        };
+    }
+};
+
+
+/**
+ * Deletes all apartments from the database.
+ *
+ * @returns {Promise<object>} Status and message of the operation.
+ */
+export const deleteAllApartments = async () => {
+    try {
+        await apartmentRepo.query('TRUNCATE TABLE "apartment" CASCADE');
+
+        return {
+            status: 'success',
+            message: 'All apartments have been deleted successfully.',
+        };
+    } catch (error) {
+        console.error('Error deleting all apartments:', error);
+        return {
+            status: 'error',
+            message: 'Internal server error',
+        };
+    }
+};
+
+
 export default {
     getApartments,
     getApartmentById,
     createApartment,
-    searchApartments
+    searchApartments,
+    deleteApartmentById,
+    deleteAllApartments
 };

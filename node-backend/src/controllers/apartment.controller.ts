@@ -151,6 +151,8 @@ export const searchApartments = async (req: Request, res: Response) => {
         unitName: req.query.unitName as string,
         unitNumber: req.query.unitNumber as string,
         project: req.query.project as string,
+        page: parseInt(req.query.page as string) || 1,
+        limit: parseInt(req.query.limit as string) || 10,
     };
 
     const result = await apartmentService.searchApartments(filters);
@@ -162,3 +164,69 @@ export const searchApartments = async (req: Request, res: Response) => {
     return res.json(result);
 };
 
+
+/**
+ * @swagger
+ * /apartments/deleteById/{id}:
+ *   delete:
+ *     summary: Delete an apartment by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Apartment ID to delete
+ *     responses:
+ *       200:
+ *         description: Apartment deleted successfully
+ *       400:
+ *         description: Validation error
+ *       404:
+ *         description: Apartment not found
+ */
+export const deleteApartmentById = async (req: Request, res: Response) => {
+    const apartmentIdDto = plainToInstance(ApartmentIdDto, req.params);
+    const errors = await validate(apartmentIdDto);
+
+    if (errors.length > 0) {
+        return res.status(400).json({
+            status: 'error',
+            message: 'Validation failed',
+            errors: formatValidationErrors(errors),
+        });
+    }
+
+    const result = await apartmentService.deleteApartmentById(Number(apartmentIdDto.id));
+
+    if (result.status === 'error') {
+        if (result.message?.includes('not found')) {
+            return res.status(404).json(result);
+        }
+        return res.status(500).json(result);
+    }
+
+    return res.json(result);
+};
+
+
+/**
+ * @swagger
+ * /apartments/deleteAll:
+ *   delete:
+ *     summary: Delete all apartments
+ *     responses:
+ *       200:
+ *         description: All apartments deleted successfully
+ *       500:
+ *         description: Internal server error
+ */
+export const deleteAllApartments = async (req: Request, res: Response) => {
+    const result = await apartmentService.deleteAllApartments();
+
+    if (result.status === 'error') {
+        return res.status(500).json(result);
+    }
+
+    return res.json(result);
+};

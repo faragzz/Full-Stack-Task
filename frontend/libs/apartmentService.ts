@@ -26,6 +26,7 @@ export const getApartmentById = async (id: number): Promise<Apartment | null> =>
     }
 };
 
+
 export const searchApartments = async (
     unitName?: string,
     unitNumber?: string,
@@ -33,15 +34,29 @@ export const searchApartments = async (
     page = 1,
     limit = 10
 ) => {
-    const params = new URLSearchParams();
+    try {
+        const params = new URLSearchParams();
 
-    params.append("page", page.toString());
-    params.append("limit", limit.toString());
+        params.append("page", page.toString());
+        params.append("limit", limit.toString());
 
-    if (unitName) params.append("unitName", unitName);
-    if (unitNumber) params.append("unitNumber", unitNumber);
-    if (project) params.append("project", project);
+        if (unitName) params.append("unitName", unitName);
+        if (unitNumber) params.append("unitNumber", unitNumber);
+        if (project) params.append("project", project);
 
-    const response = await axios.get(`/apartments/search?${params.toString()}`);
-    return response.data;
+        const response = await axios.get(`/apartments/search?${params.toString()}`);
+
+        console.log("Search: ", response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error searching apartments:", error);
+        return {
+            status: "error",
+            data: [],
+            total: 0,
+            page,
+            last_page: 0,
+            message: "Failed to fetch apartments",
+        };
+    }
 };
