@@ -9,7 +9,7 @@ export const getApartments = async (page = 1, limit = 10): Promise<ApartmentApiR
     } catch (error: any) {
         console.error('API error:', error.message);
         console.error('Config:', error.config);
-        return null
+        return null;
     }
 };
 
@@ -22,7 +22,7 @@ export const getApartmentById = async (id: number): Promise<Apartment | null> =>
     } catch (error: any) {
         console.error('API error:', error.message);
         console.error('Config:', error.config);
-        return null
+        return null;
     }
 };
 

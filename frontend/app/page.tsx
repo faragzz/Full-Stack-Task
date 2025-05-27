@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { PaginatedItems } from "@/app/components/home/paginatedItems";
-import { getApartments, searchApartments } from "@/libs/apartmentService";
-import { ApartmentApiResponse } from "@/libs/types/types";
+import React, {useState} from "react";
+import {PaginatedItems} from "@/app/components/home/paginatedItems";
 import SearchBar from "@/app/components/home/selectors";
+import {useApartments} from "@/app/hooks/useApartments";
 
 type Filters = {
     unitName?: string;
@@ -13,36 +12,12 @@ type Filters = {
 };
 
 export default function Home() {
-    const [apartments, setApartments] = useState<ApartmentApiResponse | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
 
     const [filters, setFilters] = useState<Filters>({});
 
-    useEffect(() => {
-        async function fetchData() {
-            if (
-                filters.unitName ||
-                filters.unitNumber ||
-                filters.project
-            ) {
-                // Pass filters + pagination explicitly
-                const result = await searchApartments(
-                    filters.unitName,
-                    filters.unitNumber,
-                    filters.project,
-                    currentPage,
-                    itemsPerPage
-                );
-                setApartments(result);
-            } else {
-                const result = await getApartments(currentPage, itemsPerPage);
-                setApartments(result);
-            }
-        }
-
-        fetchData();
-    }, [currentPage, filters]);
+    const {apartments, loading} = useApartments(filters, currentPage, itemsPerPage);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -60,7 +35,8 @@ export default function Home() {
 
     return (
         <div className="max-w-4xl mx-auto p-6">
-            <SearchBar onSearch={handleSearch} onClear={handleClearSearch} />
+            <SearchBar onSearch={handleSearch} onClear={handleClearSearch}/>
+            {loading && <p>Loading...</p>}
             {apartments && (
                 <PaginatedItems
                     items={apartments.data}
