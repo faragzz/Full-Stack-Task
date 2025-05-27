@@ -4,7 +4,7 @@ import {
     getApartmentById,
     createApartment,
     searchApartments,
-    deleteApartmentById, deleteAllApartments
+    deleteApartmentById, deleteAllApartments, createApartmentTestData
 } from '../controllers/apartment.controller';
 
 const router = express.Router();
@@ -15,5 +15,5 @@ router.get('/search', searchApartments);
 router.post('/create', createApartment);
 router.delete('/deleteById/:id', deleteApartmentById);
 router.delete('/deleteAll', deleteAllApartments);
-
+router.post('/create/test', createApartmentTestData);
 export default router;

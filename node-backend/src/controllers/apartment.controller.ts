@@ -5,6 +5,7 @@ import {validate} from "class-validator";
 import {ApartmentIdDto} from "../dto/apartmentIdDto";
 import formatValidationErrors from "../errorHandling";
 import apartmentService from "../services/apartmentService";
+import {generateFakeApartments} from "../mocks/generateTestApartments";
 
 /**
  * @swagger
@@ -123,6 +124,46 @@ export const createApartment = async (req: Request, res: Response) => {
 
 /**
  * @swagger
+ * /apartments/create/test:
+ *   post:
+ *     summary: Create multiple fake apartments for testing
+ *     parameters:
+ *       - in: query
+ *         name: length
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of fake apartments to create
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Apartments created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CreateApartmentDto'
+ *       400:
+ *         description: Validation failed
+ */
+
+export const createApartmentTestData = async (req: Request, res: Response) => {
+    const length = Number(req.query.length);
+    const apartments = generateFakeApartments(length || 10);
+    for (const apartment of apartments) {
+        await apartmentService.createApartment(apartment);
+    }
+    return res.status(201).json(apartments);
+};
+
+/**
+ * @swagger
  * /apartments/search:
  *   get:
  *     summary: Search for apartments by filters
@@ -142,6 +183,18 @@ export const createApartment = async (req: Request, res: Response) => {
  *         schema:
  *           type: string
  *         description: Project name
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number for pagination
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
  *     responses:
  *       200:
  *         description: Filtered list of apartments
