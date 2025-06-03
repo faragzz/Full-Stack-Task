@@ -18,7 +18,7 @@ const SearchBar = ({
                        onClear,
                        initialFilters = {},
                    }: SearchBarProps) => {
-    const [filters, setFilters] = useState<SearchFilters>(initialFilters);
+    const [filters, setFilters] = useState<SearchFilters>(initialFilters || {});
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFilters((prev) => ({
